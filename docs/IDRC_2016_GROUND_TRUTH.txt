@@ -1,0 +1,59 @@
+IDRC 2016 Wheat Protein Dataset - Ground Truth Analysis
+=======================================================
+
+1. Dataset Overview
+-------------------
+The IDRC 2016 "Shootout" dataset typically consists of Near-Infrared (NIR) spectroscopy data of durum wheat samples.
+Goal: Prediction of Grain Protein Content (GPC).
+
+2. Repeat Measurements (Ground Truth for Indeterminacy)
+-------------------------------------------------------
+According to public documentation (e.g., literature on IDRC 2016 data):
+- The standard provided dataset (often `MA_A2.csv`) usually contains **averaged** spectra.
+- Methodology: GPC values are typically the mean of **three field replicates**.
+- Spectral data: Often averaged from **two technical replicates** (separate scans) per sample.
+- Multi-instrument data: The full "Shootout" challenge often involved measuring the same samples on multiple instruments (Manufacturers A, B, C).
+    - **Calibration Set:** ~1458 spectra from 3 spectrometers x 2 brands.
+    - **Validation/Test:** Additional spectra on different instruments.
+
+**CRITICAL ACTION:**
+To validate Indeterminacy (I), we require the **unaveraged raw scans** or the **multi-instrument data**.
+- If you have the full Shootout package, look for files named `Cal_Set.mat` or `Calibration_Data.xls` that contain multiple rows per sample ID.
+- If only `MA_A2.csv` is available, we are limited to "averaged" data and cannot fully validate measurement noise, unless we treat the dataset itself as a single instrument's view and look for *similar* samples.
+
+3. Instrument Specifications (Ground Truth for Limits)
+------------------------------------------------------
+- **Technique:** NIR Spectroscopy (Transmission or Reflectance depending on exact file).
+- **Wavelength Range:**
+    - Manufacturer A: 848–1046 nm
+    - Manufacturer B: 847–1045 nm
+    - Common overlap: ~850-1050 nm
+- **Resolution:** Data often reported every 2nm or 0.5nm (interpolated).
+- **Noise Floor:** Typical NIR instrument noise is ~1e-4 to 1e-5 Absorbance Units (AU).
+- **Saturation Limit:** Typically > 3.0 AU (detectors saturate).
+- **Preprocessing:** 
+    - Savitzky-Golay (11-point, 2nd order) is common.
+    - SNV (Standard Normal Variate) is standard practice.
+
+4. Maintenance & Temporal Data
+------------------------------
+- **Timestamping:** Check if raw files contain timestamps (often in metadata or separate columns).
+- **Drift:** IDRC datasets are often designed to test calibration transfer, meaning "Instrument 1 vs Instrument 2" differences are the ground truth for "Indeterminacy" when transferring models.
+
+5. Recommended Validation Strategy
+----------------------------------
+A. **If Raw Repeats Available:**
+   - Compute `std(replicates)` for every wavelength.
+   - This is the **TRUE Indeterminacy**.
+   - Calibrate `entropy_bins` to match this profile.
+
+B. **If Only Averaged Data (MA_A2.csv) Available:**
+   - We must rely on **Instrument Specifications**.
+   - Use `lower_limits` (~noise floor) and `upper_limits` (~3.0).
+   - Use `soft_falsity` based on spectral outliers (unusual shapes).
+   - We *cannot* perfectly calibrate entropy without repeats.
+
+6. References
+-------------
+- IDRC 2016 Shootout descriptions.
+- "Evaluation of consensus methods for NIRS calibration transfer" (concept paper).

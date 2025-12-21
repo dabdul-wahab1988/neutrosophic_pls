@@ -1,0 +1,12 @@
+numpy
+scipy
+pandas
+scikit-learn
+matplotlib
+typer
+rich
+pyyaml
+pytest
+pytest-cov
+hypothesis
+pip-audit
