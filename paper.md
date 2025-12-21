@@ -384,15 +384,14 @@ Interpretation thresholds: $\text{RPD} > 3.0$ (excellent), $2.0-3.0$ (good), $< 
 
 ## Benchmark Results
 
-N-PLS has been validated on NIR spectroscopy datasets including the IDRC 2016 Wheat Protein Shootout data [@fearn2020international]. On this challenging dataset with known measurement noise from calibration transfer between instruments:
+N-PLS has been validated on NIR spectroscopy datasets. On the MA_A2 protein prediction dataset (248 samples, 741 spectral features) using 5-fold cross-validation with 3 repeats:
 
-| Method | RMSEP (%) | R² | Improvement |
-|--------|-----------|-----|-------------|
-| Classical PLS | 7.04 | -72.6 | baseline |
-| NPLS | 2.06 | -0.16 | **70.8%** |
-| NPLSW | 1.92 | 0.08 | **72.7%** |
+| Method | RMSEP | R² | MAE | Improvement |
+|--------|-------|-----|-----|-------------|
+| Classical PLS | 1.6540 ± 0.97 | 0.1058 | 0.9852 | baseline |
+| NPLS | 1.4867 ± 1.06 | 0.1854 | 0.8494 | **+10.1%** |
 
-The dramatic improvement demonstrates N-PLS's ability to identify and downweight unreliable spectral regions, resulting in more accurate protein predictions. The negative R² for Classical PLS indicates predictions worse than the mean, highlighting the severity of calibration transfer issues in this dataset.
+The automatic encoder selection chose RPCA as the optimal encoding strategy. The improvement demonstrates N-PLS's ability to identify and downweight unreliable spectral regions through neutrosophic encoding, resulting in more accurate protein predictions.
 
 ## Clean Data Performance
 

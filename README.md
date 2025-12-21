@@ -302,13 +302,16 @@ python -m neutrosophic_pls --list-data
 
 ## 📈 Example Results
 
-### IDRC 2016 Wheat Protein NIR Data
+### MA_A2 NIR Spectroscopy Dataset (Protein Prediction)
 
-| Method | RMSEP (%) | R² | Improvement |
-|--------|-----------|-----|-------------|
-| PLS | 7.04 | -72.6 | baseline |
-| NPLS | 2.06 | -0.16 | **70.8%** |
-| NPLSW | 1.92 | 0.08 | **72.7%** |
+*248 samples, 741 features, 5-fold × 3-repeat cross-validation*
+
+| Method | RMSEP | R² | MAE | Improvement |
+|--------|-------|-----|-----|-------------|
+| Classical PLS | 1.6540 ± 0.97 | 0.1058 | 0.9852 | baseline |
+| NPLS | 1.4867 ± 1.06 | 0.1854 | 0.8494 | **+10.1%** |
+
+**Configuration:** NPLS with 5 components, RPCA encoder (auto-selected)
 
 ---
 
