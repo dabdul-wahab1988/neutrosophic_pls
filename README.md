@@ -239,10 +239,10 @@ StudyConfig(dataset, model, evaluation, output)
 If you use this package in your research, please cite:
 
 ```bibtex
-@software{abdul_wahab_npls_2024,
+@software{abdul_wahab_npls_2025,
   author = {Abdul-Wahab, Dickson and Asare, Ebenezer Aquisman},
   title = {Neutrosophic Partial Least Squares (N-PLS): Uncertainty-aware PLS for Chemometrics},
-  year = {2024},
+  year = {2025},
   publisher = {GitHub},
   url = {https://github.com/abdulwahab.dickson/neutrosophic-pls}
 }

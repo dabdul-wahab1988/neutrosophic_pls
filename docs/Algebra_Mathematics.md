@@ -3,7 +3,7 @@
 ## Mathematical Foundation for T-I-F Operations
 
 **Author:** Neutrosophic PLS Development Team  
-**Date:** December 2024  
+**Date:** December 2025  
 **Version:** 1.0
 
 ---

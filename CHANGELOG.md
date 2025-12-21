@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2024-12-21
+## [1.1.0] - 2025-12-21
 
 ### Added
 
@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NPLS variants now match Classical PLS exactly on clean data (was ~5% worse)
 - NDG encoder default normalization changed to 'none' to preserve concentration signal
 
-## [1.0.0] - 2024-12-01
+## [1.0.0] - 2025-12-01
 
 ### Added
 
@@ -99,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example configuration files
 - API documentation in docstrings
 
-## [0.1.0] - 2024-11-01 (Development)
+## [0.1.0] - 2025-11-01 (Development)
 
 ### Added
 

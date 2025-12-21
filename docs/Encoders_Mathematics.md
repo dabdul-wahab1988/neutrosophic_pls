@@ -3,7 +3,7 @@
 ## Mathematical Foundation for Truth-Indeterminacy-Falsity Encoding
 
 **Author:** Neutrosophic PLS Development Team  
-**Date:** December 2024  
+**Date:** December 2025  
 **Version:** 1.0
 
 ---
