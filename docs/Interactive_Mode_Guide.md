@@ -570,4 +570,4 @@ Interactive session completed successfully!
 
 ---
 
-*Document created for the Neutrosophic PLS package - December 2024*
+*Document created for the Neutrosophic PLS package - December 2025*
