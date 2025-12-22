@@ -50,6 +50,9 @@ def run(cfg: PipelineConfig) -> Dict[str, Any]:
 
 
 def _build_model(cfg: PipelineConfig):
+    kwargs = {}
+    if cfg.model_type.lower() == "nplsw":
+        kwargs["normalize"] = cfg.weight_normalize
     return create_model_from_params(
         method=cfg.model_type,
         n_components=cfg.n_components,
@@ -57,7 +60,7 @@ def _build_model(cfg: PipelineConfig):
         lambda_falsity=cfg.lambda_falsity,
         alpha=cfg.alpha,
         channel_weights=cfg.channel_weights,
-        normalize=cfg.weight_normalize
+        **kwargs
     )
 
 
