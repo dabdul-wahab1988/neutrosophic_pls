@@ -3,6 +3,7 @@
 ## Mathematical Foundation and Proof
 
 **Author:** Dickson Abdul-Wahab and Ebenezer Aquisman Asare
+
 **Date:** December 2025  
 **Version:** 1.0
 
