@@ -2,7 +2,7 @@
 
 ## Mathematical Foundation for T-I-F Operations
 
-**Author:** Neutrosophic PLS Development Team  
+**Author:** Dickson Abdul-Wahab and Ebenezer Aquisman Asare  
 **Date:** December 2025  
 **Version:** 1.0
 
