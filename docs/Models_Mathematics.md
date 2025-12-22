@@ -2,10 +2,9 @@
 
 ## Mathematical Foundation for NPLS, NPLSW, and PNPLS
 
-**Author:** Neutrosophic PLS Development Team  
-**Date:** December 2024  
+**Author:** Dickson Abdul-Wahab and Ebenezer Aquisman Asare  
+**Date:** December 2025  
 **Version:** 1.0
-
 ---
 
 ## 1. Introduction
