@@ -162,4 +162,4 @@ To add mathematical documentation for a new module:
 
 ---
 
-*Last updated: December 2024*
+*Last updated: December 2025*
