@@ -75,10 +75,10 @@ all = [
 npls = "neutrosophic_pls.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/abdulwahab.dickson/neutrosophic-pls"
-Documentation = "https://github.com/abdulwahab.dickson/neutrosophic-pls#readme"
-Repository = "https://github.com/abdulwahab.dickson/neutrosophic-pls.git"
-Issues = "https://github.com/abdulwahab.dickson/neutrosophic-pls/issues"
+Homepage = "https://github.com/dabdul-wahab1988/neutrosophic_pls"
+Documentation = "https://github.com/dabdul-wahab1988/neutrosophic_pls#readme"
+Repository = "https://github.com/dabdul-wahab1988/neutrosophic_pls.git"
+Issues = "https://github.com/dabdul-wahab1988/neutrosophic_pls/issues"
 
 [tool.setuptools]
 packages = ["neutrosophic_pls"]
