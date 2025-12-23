@@ -27,4 +27,4 @@ jobs:
         run: python -m build
 
       - name: Publish to PyPI
-        run: twine upload dist/* -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}
+        run: pypa/gh-action-pypi-publish@release/v1
