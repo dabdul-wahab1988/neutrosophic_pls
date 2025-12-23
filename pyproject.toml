@@ -76,7 +76,7 @@ npls = "neutrosophic_pls.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/dabdul-wahab1988/neutrosophic_pls"
-Documentation = "https://github.com/dabdul-wahab1988/neutrosophic_pls#readme"
+Documentation = "https://github.com/dabdul-wahab1988/neutrosophic_pls/blob/main/README.md"
 Repository = "https://github.com/dabdul-wahab1988/neutrosophic_pls.git"
 Issues = "https://github.com/dabdul-wahab1988/neutrosophic_pls/issues"
 
