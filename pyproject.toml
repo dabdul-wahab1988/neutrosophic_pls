@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neutrosophic-pls"
-version = "1.0.0"
+version = "1.1.0"
 description = "Neutrosophic Partial Least Squares (N-PLS): Uncertainty-aware PLS with Truth/Indeterminacy/Falsity encoding for chemometrics and spectroscopy"
 readme = "README.md"
 requires-python = ">=3.9"
