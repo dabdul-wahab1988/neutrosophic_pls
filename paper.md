@@ -34,7 +34,7 @@ Neutrosophic Partial Least Squares (N-PLS) is a Python package that extends clas
 
 N-PLS addresses this limitation by encoding each measurement as a neutrosophic triplet $(T, I, F)$ representing Truth (the signal), Indeterminacy (measurement uncertainty), and Falsity (evidence of corruption or noise). This three-channel representation enables the algorithm to downweight unreliable measurements during model fitting, resulting in more robust calibration models.
 
-The package provides three N-PLS variants with increasing sophistication: standard NPLS with sample-level weighting, reliability-weighted NPLSW that computes sample-wise reliability scores from neutrosophic channels, and probabilistic PNPLS that applies element-wise precision weighting through an EM-NIPALS algorithm. Seven encoding strategies are available, including a novel Neutrosophic Differential Geometry (NDG) encoder grounded in information-theoretic principles, Robust PCA decomposition, wavelet multi-scale analysis, and automatic cross-validated encoder selection.
+The package provides three N-PLS variants with increasing sophistication: standard NPLS with sample-level reliability weighting, reliability-weighted NPLSW for stronger downweighting of noisy samples, and probabilistic PNPLS that applies element-wise precision weighting through an EM-NIPALS algorithm. The package includes eight encoding strategies (probabilistic/default, spectroscopy, robust MAD, RPCA, wavelet, quantile, augmentation, and NDG), plus an optional cross-validated auto-selection wrapper.
 
 N-PLS includes a comprehensive interactive command-line interface designed for researchers without programming experience, enabling guided analysis through a 7-step wizard. The package has been validated on real-world Near-Infrared (NIR) spectroscopy data, demonstrating up to 70% improvement in prediction accuracy compared to classical PLS on challenging datasets with measurement noise.
 
@@ -136,7 +136,7 @@ $$B = W(P^T W)^{-1} Q^T$$
 
 ## Neutrosophic Encoding Methods
 
-The core innovation of N-PLS is the transformation of raw data into neutrosophic triplets. The package offers seven encoding strategies, each suited to different data characteristics:
+The core innovation of N-PLS is the transformation of raw data into neutrosophic triplets. The package offers eight encoding strategies (plus an auto-selection wrapper), each suited to different data characteristics:
 
 ### Probabilistic Encoder
 
@@ -184,23 +184,26 @@ The low-rank component $L$ becomes Truth, the sparse component magnitude becomes
 
 | Encoder | Method | Best For |
 |---------|--------|----------|
+| Spectroscopy | Noise-floor + PCA-residual heuristics | NIR/IR spectra with instrument noise floors |
 | Wavelet | Multi-scale frequency decomposition | Periodic or multi-scale signals |
 | Quantile | Non-parametric envelope bounds | Unknown distributions |
 | Augmentation | Stability under perturbations | High-dimensional data |
 | Robust MAD | Iteratively trimmed statistics | Spike detection |
-| Auto | Cross-validated selection | General use |
+| Auto | Cross-validated selection wrapper | General use |
 
 ## Model Variants
 
 ### NPLS: Standard Neutrosophic PLS
 
-NPLS extends classical NIPALS with sample-level reliability weights derived from the Indeterminacy and Falsity channels:
+In the current codebase, NPLS operates on the Truth channel $T$ and applies *sample-level* reliability weighting computed from the fraction of high-falsity cells within each sample. Let
 
-$$r_i = \exp\left(-\lambda_I \bar{I}_i - \lambda_F \bar{F}_i\right)$$
+$$f_i = \frac{1}{p}\sum_{j=1}^{p} \mathbb{I}(F_{ij} > \tau), \quad \tau = 0.3$$
 
-where $\bar{I}_i$ and $\bar{F}_i$ are the mean I and F values for sample $i$. The weights are normalized to sum to $n$:
+and define the sample weight
 
-$$w_i = \frac{r_i}{\sum_{k=1}^{n} r_k} \cdot n$$
+$$\omega_i = \max(\varepsilon,\; 1 - \lambda_F\, f_i), \quad \varepsilon = 0.01.$$
+
+Weights are then normalized (default: mean 1). This approach downweights samples containing many corrupted measurements while preserving the signal physics in the Truth channel.
 
 During the NIPALS iteration, weighted dot products replace standard inner products:
 
@@ -210,11 +213,7 @@ where $D_w = \text{diag}(w_1, \ldots, w_n)$ is the diagonal weight matrix.
 
 ### NPLSW: Reliability-Weighted NPLS
 
-NPLSW uses a more sophisticated weighting scheme based on the proportion of reliable cells per sample:
-
-$$r_i = \left(\frac{\text{count}(F_{i,:} < \theta)}{p}\right)^\alpha$$
-
-where $\theta$ is the falsity threshold and $\alpha$ controls weighting sharpness. This approach is particularly effective when noise affects entire samples (e.g., poor sample preparation).
+NPLSW uses the same sample-level falsity-fraction idea in the current implementation (thresholding $F_{ij}$, computing $f_i$, and normalizing weights via `normalize`). The parameters `lambda_indeterminacy` and `alpha` are retained for API compatibility, but the present weighting rule is driven primarily by the falsity channel.
 
 ### PNPLS: Probabilistic Neutrosophic PLS
 
@@ -249,7 +248,7 @@ This element-wise approach allows PNPLS to handle localized corruption (e.g., de
 
 ### Clean Data Bypass
 
-All N-PLS variants include intelligent detection of clean data and gracefully degrade to sklearn's PLSRegression when neutrosophic weighting would be counterproductive (mean I/F < 0.15 and weight CV < 5%). This ensures identical performance to classical PLS on clean datasets while providing robustness when needed.
+All N-PLS variants include intelligent detection of clean data and gracefully degrade to sklearn's PLSRegression when neutrosophic weighting would be counterproductive (mean I/F < 0.15 and weight CV < 5%). This is intended to closely match classical PLS performance on clean datasets while providing robustness when needed.
 
 ## Neutrosophic Variable Importance in Projection (NVIP)
 
@@ -307,23 +306,23 @@ $$\text{SNR}(j) = \frac{\text{VIP}_T(j)}{\text{VIP}_F(j) + \epsilon}$$
 
 ## Interactive Analysis Wizard
 
-The package includes a comprehensive 7-step command-line wizard designed for researchers without programming experience:
+The package includes a 7-step command-line wizard designed for researchers without programming experience:
 
 | Step | Action | Description |
 |------|--------|-------------|
 | 1 | Data Loading | Loads CSV, Excel, ARFF, JSON, or Parquet files |
-| 2 | Target Selection | Identifies response variable and task type |
-| 3 | Encoder Selection | Automatic cross-validation or manual choice |
-| 4 | Model Selection | Chooses NPLS variant and components |
-| 5 | Analysis | Cross-validates and compares with Classical PLS |
-| 6 | VIP Analysis | Shows channel-decomposed feature importance |
-| 7 | Export | Saves figures and CSV reports |
+| 2 | Data Summary | Summarizes the dataset and prompts for target + task type |
+| 3 | Encoder Selection | Auto-selection or manual encoder choice |
+| 4 | Variant Selection | Chooses NPLS / NPLSW / PNPLS and key settings |
+| 5 | Run Analysis | Runs cross-validation and compares against classical PLS |
+| 6 | VIP Analysis | Computes channel-decomposed feature importance (optional) |
+| 7 | Export Figures | Saves report figures (optional) |
 
 The wizard provides formatted comparison tables, progress bars, and diagnostic messages, making advanced chemometric analysis accessible to domain experts who may not have programming backgrounds.
 
 ## Python API
 
-For programmatic use, N-PLS provides a scikit-learn compatible API with comprehensive functionality for advanced users.
+For programmatic use, N-PLS provides a scikit-learn-style `fit`/`predict` API for advanced users.
 
 ### Basic Usage
 
@@ -388,7 +387,7 @@ model = PNPLS(
 
 ### Encoder Configuration
 
-The package provides seven encoding strategies with customizable parameters:
+The package provides multiple encoding strategies with customizable parameters:
 
 ```python
 from neutrosophic_pls import encode_neutrosophic, EncoderConfig
@@ -396,7 +395,7 @@ from neutrosophic_pls import encode_neutrosophic, EncoderConfig
 # Probabilistic encoder (default) - statistical residuals
 x_tif, y_tif, meta = encode_neutrosophic(
     X, y,
-    encoding={"name": "probabilistic", "rank": 5, "beta": 1.5},
+    encoding={"name": "probabilistic", "params": {"rank": 5, "beta": 1.5}},
     return_metadata=True
 )
 
@@ -405,9 +404,11 @@ x_tif, y_tif, meta = encode_neutrosophic(
     X, y,
     encoding={
         "name": "rpca",
-        "beta_I": 2.0,              # Power for indeterminacy transform
-        "beta_F": 2.0,              # Power for falsity transform
-        "lambda_sparse": None       # Auto-computed if None
+        "params": {
+            "beta_I": 2.0,              # Power for indeterminacy transform
+            "beta_F": 2.0,              # Power for falsity transform
+            "lambda_sparse": None       # Auto-computed if None
+        }
     },
     return_metadata=True
 )
@@ -417,8 +418,10 @@ x_tif, y_tif, meta = encode_neutrosophic(
     X, y,
     encoding={
         "name": "ndg",
-        "normalization": "none",    # "none", "snv", or "minmax"
-        "window_size": 5            # Local variance window
+        "params": {
+            "normalization": "none",  # "none", "snv", or "minmax"
+            "local_window": 5          # Local variance window
+        }
     },
     return_metadata=True
 )
@@ -428,10 +431,12 @@ x_tif, y_tif, meta = encode_neutrosophic(
     X, y,
     encoding={
         "name": "wavelet",
-        "wavelet": "db2",           # Wavelet family
-        "level": None,              # Auto-select if None
-        "high_bands": (1,),         # Bands for falsity
-        "mid_bands": (2, 3)         # Bands for indeterminacy
+        "params": {
+            "wavelet": "db2",           # Wavelet family
+            "level": None,              # Auto-select if None
+            "high_bands": (1,),         # Bands for falsity
+            "mid_bands": (2, 3)         # Bands for indeterminacy
+        }
     },
     return_metadata=True
 )
@@ -448,27 +453,32 @@ x_tif, y_tif, meta = encode_neutrosophic(
     return_metadata=True
 )
 print(f"Selected encoder: {meta['encoder']['name']}")
-print(f"Encoder scores: {meta['encoder'].get('scores', {})}")
+print(f"Encoder scores: {meta['encoder'].get('auto_scores', {})}")
 ```
 
 ### Cross-Validation and Model Comparison
 
-For rigorous evaluation, use scikit-learn's cross-validation utilities:
+For rigorous evaluation, use a manual cross-validation loop (this avoids scikit-learn estimator cloning requirements):
 
 ```python
 import numpy as np
-from sklearn.model_selection import RepeatedKFold, cross_val_predict
-from neutrosophic_pls import NPLSW, evaluation_metrics, rmsep, r2_score
+from sklearn.model_selection import RepeatedKFold
+from neutrosophic_pls import NPLSW, evaluation_metrics
 
 # Setup cross-validation
 cv = RepeatedKFold(n_splits=5, n_repeats=3, random_state=42)
 
-# Cross-validated predictions
-model = NPLSW(n_components=10)
-y_pred_cv = cross_val_predict(model, data["x_tif"], data["y_tif"], cv=cv)
+# Cross-validated predictions (Truth channel is used for y_true)
+y_true = data["y_tif"][..., 0].ravel()
+y_pred_cv = np.zeros_like(y_true, dtype=float)
+
+for train_idx, test_idx in cv.split(data["x_tif"]):
+    model = NPLSW(n_components=10)
+    model.fit(data["x_tif"][train_idx], data["y_tif"][train_idx])
+    y_pred_cv[test_idx] = model.predict(data["x_tif"][test_idx]).ravel()
 
 # Compute metrics
-metrics = evaluation_metrics(data["y_tif"], y_pred_cv)
+metrics = evaluation_metrics(y_true, y_pred_cv, include_extended=True)
 print(f"RMSEP: {metrics['RMSEP']:.4f}")
 print(f"R²: {metrics['R2']:.4f}")
 print(f"MAE: {metrics['MAE']:.4f}")
@@ -508,7 +518,7 @@ reconstruction = np.sqrt(vip_t**2 + vip_i**2 + vip_f**2)
 assert np.allclose(aggregate_vip, reconstruction, rtol=0.01)
 
 # Identify important features
-feature_names = data.get("feature_names", list(range(len(aggregate_vip))))
+feature_names = data["metadata"].get("feature_names", list(range(len(aggregate_vip))))
 important_idx = np.where(aggregate_vip > 1.0)[0]
 print(f"Important features (VIP > 1): {len(important_idx)}")
 
@@ -634,7 +644,7 @@ model = NPLSW(n_components=10)
 model.fit(train_x_tif, train_y_tif)
 
 # Encode new data with same encoder
-new_x_tif, _, _ = encode_neutrosophic(
+new_x_tif, _ = encode_neutrosophic(
     new_X, 
     np.zeros(len(new_X)),  # Dummy y for new data
     encoding={"name": "rpca"}  # Must match training encoder
@@ -652,11 +662,12 @@ N-PLS is designed with modularity and extensibility in mind. The package follows
 
 ### `encoders.py` - Neutrosophic Encoding Strategies
 
-Implements seven encoding strategies for transforming raw data into neutrosophic triplets (T, I, F):
+Implements the encoding strategies for transforming raw data into neutrosophic triplets (T, I, F):
 
 | Function | Description |
 |----------|-------------|
 | `encode_probabilistic_tif()` | Statistical residuals from low-rank SVD model with MAD-based robust statistics |
+| `encode_spectroscopy_tif()` | Spectroscopy-specific I/F encoding using a noise floor and PCA-residual diagnostics |
 | `encode_rpca_mixture()` | Robust PCA via Principal Component Pursuit: low-rank Truth, sparse Falsity |
 | `encode_wavelet_multiscale()` | Multi-scale wavelet decomposition: low-frequency Truth, high-frequency Falsity |
 | `encode_quantile_envelope()` | Non-parametric quantile-based boundaries for T/I/F channels |
@@ -673,8 +684,11 @@ Implements seven encoding strategies for transforming raw data into neutrosophic
 **Auto-Selection Pipeline:**
 
 ```python
-auto_select_encoder(X, y, config, task="regression")  # Returns best encoder via CV
-dispatch_encoder(X, encoder_config)  # Routes to appropriate encoder function
+from neutrosophic_pls.encoders import EncoderConfig, auto_select_encoder, dispatch_encoder
+
+cfg = EncoderConfig.from_value({"name": "auto", "cv_folds": 3, "max_components": 5})
+best_encoding, selection = auto_select_encoder(X, y, cfg, task="regression")
+encoding = dispatch_encoder(X, selection.best_config)  # run the selected encoder
 ```
 
 ### `model.py` - N-PLS Model Implementations
@@ -713,17 +727,22 @@ Contains three NIPALS-based PLS variants with neutrosophic weighting:
 
 ### `vip.py` - Variable Importance in Projection
 
-Provides channel-decomposed VIP analysis with exact L2-norm decomposition:
+Provides channel-attributed VIP analysis with two decomposition modes:
+- **Variance-based** (default): SS/projection-based attribution with **L2 aggregation**
+- **Correlation-based** (legacy): correlation-proportion attribution with **linear aggregation**
 
 | Function | Description |
 |----------|-------------|
 | `compute_nvip()` | Main function returning aggregate and channel-specific VIP scores |
 | `_vip_from_pls()` | Standard VIP computation from fitted model |
-| `_channel_contribution_vip()` | Variance-based channel decomposition (exact L2) |
-| `_channel_correlation_vip()` | Alternative correlation-based decomposition |
+| `_channel_contribution_vip()` | Variance-based channel attribution (L2-aggregated by default) |
+| `_channel_correlation_vip()` | Correlation-based channel attribution (linear-sum aggregate) |
 
-**Mathematical Property:**
+**Mathematical Property (variance-based default):**
 $$\text{VIP}_{\text{aggregate}} = \sqrt{\text{VIP}_T^2 + \text{VIP}_I^2 + \text{VIP}_F^2}$$
+
+For the legacy correlation-based mode, the aggregate is reported as:
+$$\text{VIP}_{\text{aggregate}} = \text{VIP}_T + \text{VIP}_I + \text{VIP}_F$$
 
 ### `data_loader.py` - Universal Data Loading
 
@@ -920,7 +939,7 @@ The top predictive features (VIP ≈ 2.0) were located in the 1024-1028.5 wavele
 
 ## Clean Data Performance
 
-On clean data without significant noise, all N-PLS variants match Classical PLS performance exactly due to the clean data bypass mechanism. This bypass activates when:
+On clean data without significant noise, the N-PLS variants are designed to closely match Classical PLS performance via a clean-data bypass that falls back to `PLSRegression` when neutrosophic weighting is unlikely to help. This bypass activates when:
 
 1. Mean Indeterminacy and Falsity are below 0.15
 2. Sample weight coefficient of variation is below 5%
