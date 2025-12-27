@@ -10,20 +10,25 @@ Understanding what NPLS VIP actually measures:
    based on the raw X data and the fitted PLS model weights.
 
 2. **NPLS VIP**: The NPLS model fits on the Truth channel but uses I/F for
-   sample-level reliability weighting. The VIP is then computed from the 
-   fitted model's weights and scores.
-   
-   The VIP is DECOMPOSED into channel contributions:
-   
-   - VIP^T: Importance attributed to the Truth (signal) channel variance
-   - VIP^I: Importance attributed to the Indeterminacy (uncertainty) channel variance
-   - VIP^F: Importance attributed to the Falsity (outlier/noise) channel variance
+     sample-level reliability weighting. VIP is computed from the fitted model's
+     weights and scores, and then *attributed* to the T/I/F channels.
 
-   The decomposition satisfies: VIP^T + VIP^I + VIP^F = aggregate_VIP
-   
-   NOTE: This decomposition is a heuristic based on relative variance proportions,
-   not a mathematical decomposition of the VIP formula itself. It provides an
-   interpretation of which channel's variability is associated with important features.
+     Two attribution modes are available (see `compute_nvip(..., decomposition_method=...)`):
+
+     - **variance** (default): channel VIPs are computed from channel-wise SS terms
+         obtained by projecting each channel onto the learned weight directions.
+         The aggregate is reported via an L2 relationship:
+
+             VIP_aggregate[j] = sqrt(VIP_T[j]^2 + VIP_I[j]^2 + VIP_F[j]^2)
+
+     - **correlation** (legacy): channel VIPs are allocated by channel correlation
+         proportions, and the aggregate is reported as a linear sum:
+
+             VIP_aggregate[j] = VIP_T[j] + VIP_I[j] + VIP_F[j]
+
+     NOTE: These are channel attribution scores intended for interpretation.
+     They should not be read as a unique, assumption-free decomposition of the
+     classical VIP formula under all possible data-generating processes.
 
 3. **Interpretation Guide**:
    - High VIP^T: The feature's signal values drive its importance
@@ -275,7 +280,7 @@ def compute_nvip(
     channel_weights: Tuple[float, float, float] = (1.0, 1.0, 1.0),
     decomposition_method: str = "variance"
 ) -> Dict[str, np.ndarray]:
-    """
+   """
     Compute neutrosophic VIP for each channel and aggregated.
     
     Parameters
@@ -289,8 +294,8 @@ def compute_nvip(
         Weights for combining channels (wT, wI, wF)
     decomposition_method : str
         Method for decomposing VIP into channels:
-        - "variance": Exact decomposition based on SS contributions (recommended)
-        - "correlation": Based on correlation with latent scores (legacy)
+        - "variance": SS-based channel attribution with L2 aggregation (recommended)
+        - "correlation": Correlation-proportion attribution with linear aggregation (legacy)
     
     Returns
     -------
@@ -302,13 +307,19 @@ def compute_nvip(
     
     Mathematical Properties
     -----------------------
-    The decomposition satisfies the L2-norm relationship:
-    
+    For `decomposition_method="variance"` (default), the reported aggregate
+    satisfies the L2 relationship:
+
         aggregate[j] = sqrt(T[j]² + I[j]² + F[j]²)
-    
-    This is an EXACT mathematical decomposition, not an approximation.
-    Each channel VIP measures the explained variance contribution from 
-    projecting that channel onto the model's learned weight directions.
+
+    For `decomposition_method="correlation"` (legacy), the reported aggregate
+    is the linear sum:
+
+        aggregate[j] = T[j] + I[j] + F[j]
+
+    The variance-based channel VIPs are computed from channel-wise projections
+    onto the fitted model's weight directions to provide an interpretable
+    attribution of VIP across T/I/F.
     
     Interpretation Guide
     --------------------
