@@ -38,6 +38,8 @@ The package provides three N-PLS variants with increasing sophistication: standa
 
 N-PLS includes a comprehensive interactive command-line interface designed for researchers without programming experience, enabling guided analysis through a 7-step wizard. The package has been validated on real-world Near-Infrared (NIR) spectroscopy data, demonstrating up to 70% improvement in prediction accuracy compared to classical PLS on challenging datasets with measurement noise.
 
+The software release associated with this paper is archived on Zenodo with DOI: https://doi.org/10.5281/zenodo.18131413 [@abdulwahab2026npls].
+
 # Statement of Need
 
 Partial Least Squares (PLS) regression is the workhorse algorithm of chemometrics, widely used for quantitative analysis from spectroscopic data in pharmaceutical, agricultural, food, and environmental applications [@wold1984multivariate; @geladi1986partial]. However, classical PLS assumes that all measurements are equally reliable—an assumption that rarely holds in practice. Real-world spectroscopic measurements are affected by:
