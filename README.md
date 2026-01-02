@@ -213,6 +213,18 @@ Basic N-PLS operating on the concatenated T/I/F tensor with configurable channel
 model = NPLS(n_components=10, channel_weights=(1.0, 1.0, 1.0))
 ```
 
+#### Clean-data limit (PLS fallback)
+
+All N-PLS variants are designed to reduce to classical PLS on clean data (when Indeterminacy/Falsity are low and reliability/precision weights become effectively uniform). For performance and numerical stability, the implementation may optionally dispatch to scikit-learn's `PLSRegression` in this regime.
+
+You can disable this behavior for strict algorithmic purity/reproducibility in experiments:
+
+```python
+model = NPLS(n_components=10, allow_sklearn_bypass=False)
+```
+
+When enabled, bypass activation is recorded on the fitted model via `bypass_triggered_` and `bypass_reason_`.
+
 ### NPLSW (Reliability-Weighted)
 
 Computes **sample-wise reliability** from I/F channels and downweights uncertain samples during fitting.

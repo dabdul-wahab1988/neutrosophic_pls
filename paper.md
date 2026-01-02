@@ -248,7 +248,9 @@ This element-wise approach allows PNPLS to handle localized corruption (e.g., de
 
 ### Clean Data Bypass
 
-All N-PLS variants include intelligent detection of clean data and gracefully degrade to sklearn's PLSRegression when neutrosophic weighting would be counterproductive (mean I/F < 0.15 and weight CV < 5%). This is intended to closely match classical PLS performance on clean datasets while providing robustness when needed.
+All N-PLS variants include detection of effectively clean data and, by default, may dispatch to scikit-learn's `PLSRegression` when neutrosophic weighting is unlikely to change the solution (mean I/F < 0.15 and weights close to uniform). This behavior reflects the theoretical clean-data limit where N-PLS reduces to classical PLS, while improving runtime and numerical stability.
+
+For reproducibility and strict algorithmic purity in ablation studies, this dispatch is user-controllable (`allow_sklearn_bypass=False`) and its activation is recorded on the fitted model via `bypass_triggered_` and `bypass_reason_`.
 
 ## Neutrosophic Variable Importance in Projection (NVIP)
 

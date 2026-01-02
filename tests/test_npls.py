@@ -255,6 +255,56 @@ def test_pnpls_fit_predict():
     assert r2 > 0.8
 
 
+def test_clean_data_bypass_is_visible_and_configurable():
+    """Bypass should be visible on the estimator and disable-able (JOSS reproducibility)."""
+    from neutrosophic_pls import NPLS, NPLSW, PNPLS
+
+    rng = np.random.default_rng(123)
+    n_samples, n_features = 40, 5
+    T = rng.normal(size=(n_samples, n_features))
+    y = (T @ rng.normal(size=(n_features, 1)) + 0.01 * rng.normal(size=(n_samples, 1))).astype(float)
+
+    # Construct "clean" neutrosophic tensors: I=F=0 -> should trigger clean-data detection.
+    x_tif = np.stack([T, np.zeros_like(T), np.zeros_like(T)], axis=-1)
+    y_tif = np.stack([y, np.zeros_like(y), np.zeros_like(y)], axis=-1)
+
+    # Default: bypass allowed
+    m1 = NPLS(n_components=2)
+    m1.fit(x_tif, y_tif)
+    assert hasattr(m1, "bypass_triggered_")
+    assert hasattr(m1, "bypass_reason_")
+    assert m1.bypass_triggered_ is True
+    assert m1.bypass_reason_ in {"low_IF", "uniform_weights"}
+
+    # Disabled: should not dispatch to sklearn
+    m2 = NPLS(n_components=2, allow_sklearn_bypass=False)
+    m2.fit(x_tif, y_tif)
+    assert m2.bypass_triggered_ is False
+    assert m2.bypass_reason_ is None
+
+    # Repeat for NPLSW
+    w1 = NPLSW(n_components=2)
+    w1.fit(x_tif, y_tif)
+    assert w1.bypass_triggered_ is True
+    assert w1.bypass_reason_ in {"low_IF", "uniform_weights"}
+
+    w2 = NPLSW(n_components=2, allow_sklearn_bypass=False)
+    w2.fit(x_tif, y_tif)
+    assert w2.bypass_triggered_ is False
+    assert w2.bypass_reason_ is None
+
+    # PNPLS uses fit_transform internally; verify the same public reporting.
+    p1 = PNPLS(n_components=2)
+    p1.fit(x_tif, y_tif)
+    assert p1.bypass_triggered_ is True
+    assert p1.bypass_reason_ in {"low_IF", "uniform_weights"}
+
+    p2 = PNPLS(n_components=2, allow_sklearn_bypass=False)
+    p2.fit(x_tif, y_tif)
+    assert p2.bypass_triggered_ is False
+    assert p2.bypass_reason_ is None
+
+
 def test_rpca_encoder_outputs():
     """RPCA encoder should return bounded I/F and low-rank truth."""
     from neutrosophic_pls.encoders import encode_rpca_mixture

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from typing import Literal, Tuple
+import warnings
 import numpy as np
 
 from .algebra import combine_channels
@@ -13,6 +14,12 @@ class NPLSConfig:
     max_iter: int = 500
     tol: float = 1e-7
     channel_weights: Tuple[float, float, float] = (1.0, 0.5, 1.0)
+    # If True, automatically dispatch to sklearn's PLSRegression on clean data
+    # (low I/F or effectively-uniform weights). This matches the theoretical
+    # clean-data limit where NPLS reduces to classical PLS.
+    allow_sklearn_bypass: bool = True
+    # If True, emit a RuntimeWarning when the bypass triggers.
+    warn_on_bypass: bool = False
     # NOTE: combine_mode is retained for backward compatibility with earlier
     # cell-level gating experiments. The current NPLS implementation always
     # uses the Truth channel directly and does not call combine_channels.
@@ -43,6 +50,8 @@ class NPLS:
         tol: float = 1e-7,
         channel_weights: Tuple[float, float, float] = (1.0, 0.5, 1.0),
         lambda_falsity: float = 0.5,
+        allow_sklearn_bypass: bool = True,
+        warn_on_bypass: bool = False,
     ) -> None:
         self.config = NPLSConfig(
             n_components=n_components,
@@ -50,10 +59,15 @@ class NPLS:
             tol=tol,
             channel_weights=channel_weights,
             lambda_falsity=lambda_falsity,
+            allow_sklearn_bypass=allow_sklearn_bypass,
+            warn_on_bypass=warn_on_bypass,
         )
         self.converged_: bool = False
         self.iterations_: list[int] = []
         self._fitted: bool = False
+        self._use_sklearn: bool = False
+        self.bypass_triggered_: bool = False
+        self.bypass_reason_: str | None = None
 
     def _compute_sample_weights(self, x_tif: np.ndarray) -> np.ndarray:
         """
@@ -95,6 +109,10 @@ class NPLS:
         return x_tif[..., 0]
 
     def fit(self, x_tif: np.ndarray, y_tif: np.ndarray) -> "NPLS":
+        # Reset bypass status for each fit
+        self._use_sklearn = False
+        self.bypass_triggered_ = False
+        self.bypass_reason_ = None
         # CLEAN DATA BYPASS: Use sklearn PLS when I/F are low or weights are uniform
         # Raised threshold from 0.01 to 0.15 since encoders produce I/F ~0.05-0.10
         # even for relatively clean data
@@ -111,7 +129,7 @@ class NPLS:
             weight_cv < 0.05  # Weights are effectively uniform (CV < 5%)
         )
         
-        if use_sklearn_bypass:
+        if self.config.allow_sklearn_bypass and use_sklearn_bypass:
             from sklearn.cross_decomposition import PLSRegression
             X = x_tif[..., 0]
             Y = y_tif[..., 0] if y_tif.ndim == 3 else y_tif
@@ -133,6 +151,14 @@ class NPLS:
             self._sklearn_pls = pls
             self._use_sklearn = True
             self._bypass_reason = "low_IF" if (mean_F < 0.15 and mean_I < 0.15) else "uniform_weights"
+            self.bypass_triggered_ = True
+            self.bypass_reason_ = self._bypass_reason
+            if self.config.warn_on_bypass:
+                warnings.warn(
+                    f"NPLS clean-data bypass triggered ({self.bypass_reason_}); using sklearn PLSRegression. "
+                    "Set allow_sklearn_bypass=False to disable.",
+                    RuntimeWarning,
+                )
             return self
         # Automatically combine channels based on corruption level
         X = self._detect_and_combine(x_tif, is_fit=True)
@@ -299,6 +325,8 @@ class NPLSWConfig:
     max_iter: int = 500
     tol: float = 1e-7
     channel_weights: Tuple[float, float, float] = (1.0, 0.5, 1.0)
+    allow_sklearn_bypass: bool = True
+    warn_on_bypass: bool = False
 
 
 class NPLSW:
@@ -327,6 +355,8 @@ class NPLSW:
         max_iter: int = 500,
         tol: float = 1e-7,
         channel_weights: Tuple[float, float, float] = (1.0, 0.5, 1.0),
+        allow_sklearn_bypass: bool = True,
+        warn_on_bypass: bool = False,
     ) -> None:
         self.config = NPLSWConfig(
             n_components=n_components,
@@ -337,10 +367,15 @@ class NPLSW:
             max_iter=max_iter,
             tol=tol,
             channel_weights=channel_weights,
+            allow_sklearn_bypass=allow_sklearn_bypass,
+            warn_on_bypass=warn_on_bypass,
         )
         self.converged_: bool = False
         self.iterations_: list[int] = []
         self._fitted: bool = False
+        self._use_sklearn: bool = False
+        self.bypass_triggered_: bool = False
+        self.bypass_reason_: str | None = None
 
     def _compute_sample_weights(self, x_tif: np.ndarray, y_tif: np.ndarray) -> np.ndarray:
         """
@@ -370,6 +405,10 @@ class NPLSW:
         return omega
 
     def fit(self, x_tif: np.ndarray, y_tif: np.ndarray) -> "NPLSW":
+        # Reset bypass status for each fit
+        self._use_sklearn = False
+        self.bypass_triggered_ = False
+        self.bypass_reason_ = None
         # CLEAN DATA BYPASS: Use sklearn PLS when I/F are low or weights are uniform
         # Raised threshold from 0.01 to 0.15 since encoders produce I/F ~0.05-0.10
         # even for relatively clean data
@@ -386,7 +425,7 @@ class NPLSW:
             weight_cv < 0.05  # Weights are effectively uniform (CV < 5%)
         )
         
-        if use_sklearn_bypass:
+        if self.config.allow_sklearn_bypass and use_sklearn_bypass:
             from sklearn.cross_decomposition import PLSRegression
             X = x_tif[..., 0]
             Y = y_tif[..., 0] if y_tif.ndim == 3 else y_tif
@@ -408,6 +447,14 @@ class NPLSW:
             self._sklearn_pls = pls
             self._use_sklearn = True
             self._bypass_reason = "low_IF" if (mean_F < 0.15 and mean_I < 0.15) else "uniform_weights"
+            self.bypass_triggered_ = True
+            self.bypass_reason_ = self._bypass_reason
+            if self.config.warn_on_bypass:
+                warnings.warn(
+                    f"NPLSW clean-data bypass triggered ({self.bypass_reason_}); using sklearn PLSRegression. "
+                    "Set allow_sklearn_bypass=False to disable.",
+                    RuntimeWarning,
+                )
             return self
         # Compute sample weights based on proportion of high-F cells
         weights = self._compute_sample_weights(x_tif, y_tif)
@@ -554,6 +601,8 @@ class PNPLSConfig:
     tol: float = 1e-7
     lambda_falsity: float = 0.5    # Strength of variance prior
     convergence_eps: float = 1e-5  # Threshold for EM convergence
+    allow_sklearn_bypass: bool = True
+    warn_on_bypass: bool = False
 
 class PNPLS:
     r"""
@@ -596,6 +645,8 @@ class PNPLS:
         lambda_falsity: float = 0.5,
         max_iter: int = 500,
         tol: float = 1e-7,
+        allow_sklearn_bypass: bool = True,
+        warn_on_bypass: bool = False,
         # Legacy parameters (ignored but kept for API compatibility)
         lambda_indeterminacy: float = 0.0,
         alpha: float = 0.0,
@@ -606,10 +657,15 @@ class PNPLS:
             lambda_falsity=lambda_falsity,
             max_iter=max_iter,
             tol=tol,
+            allow_sklearn_bypass=allow_sklearn_bypass,
+            warn_on_bypass=warn_on_bypass,
         )
         self.converged_: bool = False
         self.n_iter_: int = 0
         self._fitted: bool = False
+        self._use_sklearn: bool = False
+        self.bypass_triggered_: bool = False
+        self.bypass_reason_: str | None = None
 
     def _compute_precision_weights(self, x_tif: np.ndarray) -> np.ndarray:
         r"""
@@ -644,6 +700,10 @@ class PNPLS:
         return self
 
     def fit_transform(self, x_tif: np.ndarray, y: np.ndarray) -> np.ndarray:
+        # Reset bypass status for each fit
+        self._use_sklearn = False
+        self.bypass_triggered_ = False
+        self.bypass_reason_ = None
         # CLEAN DATA BYPASS: Use sklearn PLS when I/F are low or precision weights are uniform
         # Raised threshold from 0.01 to 0.15 since encoders produce I/F ~0.05-0.10
         # even for relatively clean data
@@ -662,7 +722,7 @@ class PNPLS:
             weights_near_one  # Precision weights are essentially 1.0
         )
         
-        if use_sklearn_bypass:
+        if self.config.allow_sklearn_bypass and use_sklearn_bypass:
             from sklearn.cross_decomposition import PLSRegression
             X = x_tif[..., 0]
             Y = y[..., 0] if y.ndim == 3 else y
@@ -682,6 +742,14 @@ class PNPLS:
             self._sklearn_pls = pls
             self._use_sklearn = True
             self._bypass_reason = "low_IF" if (mean_F < 0.15 and mean_I < 0.15) else "uniform_weights"
+            self.bypass_triggered_ = True
+            self.bypass_reason_ = self._bypass_reason
+            if self.config.warn_on_bypass:
+                warnings.warn(
+                    f"PNPLS clean-data bypass triggered ({self.bypass_reason_}); using sklearn PLSRegression. "
+                    "Set allow_sklearn_bypass=False to disable.",
+                    RuntimeWarning,
+                )
             return pls.transform(X)
         
         # 1. Setup Data
