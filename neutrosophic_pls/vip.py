@@ -278,9 +278,9 @@ def compute_nvip(
     model: NPLSModel, 
     x_tif: np.ndarray, 
     channel_weights: Tuple[float, float, float] = (1.0, 1.0, 1.0),
-    decomposition_method: str = "variance"
+    decomposition_method: str = "correlation"
 ) -> Dict[str, np.ndarray]:
-   """
+    """
     Compute neutrosophic VIP for each channel and aggregated.
     
     Parameters
@@ -294,28 +294,28 @@ def compute_nvip(
         Weights for combining channels (wT, wI, wF)
     decomposition_method : str
         Method for decomposing VIP into channels:
-        - "variance": SS-based channel attribution with L2 aggregation (recommended)
-        - "correlation": Correlation-proportion attribution with linear aggregation (legacy)
+        - "correlation": Correlation-proportion attribution with linear aggregation (default)
+        - "variance": SS-based channel attribution with L2 aggregation
     
     Returns
     -------
     dict with keys:
-        'aggregate': Total VIP (L2 norm of channel VIPs)
+        'aggregate': Total VIP (aggregation depends on `decomposition_method`)
         'T': VIP contribution from Truth channel
         'I': VIP contribution from Indeterminacy channel  
         'F': VIP contribution from Falsity channel
     
     Mathematical Properties
     -----------------------
-    For `decomposition_method="variance"` (default), the reported aggregate
-    satisfies the L2 relationship:
-
-        aggregate[j] = sqrt(T[j]² + I[j]² + F[j]²)
-
-    For `decomposition_method="correlation"` (legacy), the reported aggregate
+    For `decomposition_method="correlation"` (default), the reported aggregate
     is the linear sum:
 
         aggregate[j] = T[j] + I[j] + F[j]
+
+    For `decomposition_method="variance"`, the reported aggregate satisfies the
+    L2 relationship:
+
+        aggregate[j] = sqrt(T[j]² + I[j]² + F[j]²)
 
     The variance-based channel VIPs are computed from channel-wise projections
     onto the fitted model's weight directions to provide an interpretable
