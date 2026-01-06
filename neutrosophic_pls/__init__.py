@@ -5,8 +5,8 @@ A Python package for uncertainty-aware Partial Least Squares using
 neutrosophic (Truth, Indeterminacy, Falsity) encoding.
 
 Authors:
-    Dickson Abdul-Wahab <dabdul-wahab@live.com>
     Ebenezer Aquisman Asare <aquisman1989@gmail.com>
+    Dickson Abdul-Wahab <dabdul-wahab@live.com>
 
 University of Ghana
 
@@ -20,8 +20,8 @@ Usage:
     python -m neutrosophic_pls --data data.csv --target y
 """
 
-__version__ = "1.0.0"
-__author__ = "Dickson Abdul-Wahab, Ebenezer Aquisman Asare"
+__version__ = "1.0.2"
+__author__ = "Ebenezer Aquisman Asare, Dickson Abdul-Wahab"
 __email__ = "dabdul-wahab@live.com"
 __license__ = "MIT"
 

@@ -2,7 +2,7 @@
 
 ## Mathematical Foundation for Model Evaluation
 
-**Author:** Dickson Abdul-Wahab and Ebenezer Aquisman Asare  
+**Author:** Ebenezer Aquisman Asare and Dickson Abdul-Wahab  
 **Date:** December 2025  
 **Version:** 1.0
 

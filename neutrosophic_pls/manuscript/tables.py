@@ -27,7 +27,7 @@ Usage:
     gen.doe_table()
 
 Authors:
-    Dickson Abdul-Wahab, Ebenezer Aquisman Asare
+    Ebenezer Aquisman Asare, Dickson Abdul-Wahab
 """
 
 from __future__ import annotations

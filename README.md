@@ -18,19 +18,19 @@ Traditional PLS treats all measurements as equally reliable. **N-PLS is differen
 - ⚠️ **Uncertain measurements** (Indeterminacy)  
 - ❌ **Outliers and noise** (Falsity)
 
-By encoding your data into these three channels, N-PLS achieves **up to 70% better prediction accuracy** on noisy spectroscopic data.
+On the included MA_A2 NIR spectroscopy dataset (protein prediction; 248 samples, 741 features; 5-fold × 3-repeat CV), N-PLS reduces RMSEP by **~10%** compared to classical PLS (e.g., 1.6540 ± 0.97 → 1.4867 ± 1.06).
 
 ---
 
 ## 👥 Authors
 
+- **Ebenezer Aquisman Asare** - Ghana Atomic Energy Commission  
+  [![ORCID](https://img.shields.io/badge/ORCID-0000--0003--1185--1479-green.svg)](https://orcid.org/0000-0003-1185-1479)
+
 - **Dickson Abdul-Wahab** - University of Ghana  
   [![ORCID](https://img.shields.io/badge/ORCID-0000--0001--7446--5909-green.svg)](https://orcid.org/0000-0001-7446-5909)
   [![LinkedIn](https://img.shields.io/badge/LinkedIn-dickson--abdul--wahab-blue.svg)](https://www.linkedin.com/in/dickson-abdul-wahab-0764a1a9)
   [![ResearchGate](https://img.shields.io/badge/ResearchGate-Dickson--Abdul--Wahab-00CCBB.svg)](https://www.researchgate.net/profile/Dickson-Abdul-Wahab)
-
-- **Ebenezer Aquisman Asare**  
-  [![ORCID](https://img.shields.io/badge/ORCID-0000--0003--1185--1479-green.svg)](https://orcid.org/0000-0003-1185-1479)
 
 ---
 
@@ -61,9 +61,7 @@ python -m neutrosophic_pls --interactive
 STEP 1/7: Load Your Data
 ──────────────────────────────────────────────────────
 Available datasets in 'data/':
-  1. A3 (CSV, 1.84 MB)
-  2. B1 (CSV, 2.24 MB)
-  3. MA_A2 (CSV, 1.84 MB)
+  1. MA_A2 (CSV, 1.84 MB)
   
 Enter selection (1-5) or file path: 
 ```
@@ -369,12 +367,14 @@ pip install -e ".[dev]"
 If you use this package in your research, please cite:
 
 ```bibtex
-@software{abdul_wahab_npls_2025,
-  author = {Abdul-Wahab, Dickson and Asare, Ebenezer Aquisman},
-  title = {Neutrosophic Partial Least Squares (N-PLS): Uncertainty-aware PLS for Chemometrics},
-  year = {2025},
-  publisher = {GitHub},
-  url = {https://github.com/dabdul-wahab1988/neutrosophic_pls}
+@software{asare_npls_2026,
+  author = {Asare, Ebenezer Aquisman and Abdul-Wahab, Dickson},
+  title = {Neutrosophic Partial Least Squares (N-PLS)},
+  year = {2026},
+  version = {1.0.2},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.18131413},
+  url = {https://doi.org/10.5281/zenodo.18131413}
 }
 ```
 
@@ -394,8 +394,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📧 Contact
 
-- **Dickson Abdul-Wahab** - <dabdul-wahab@live.com>
 - **Ebenezer Aquisman Asare** - <aquisman1989@gmail.com>
+- **Dickson Abdul-Wahab** - <dabdul-wahab@live.com>
 
 ---
 

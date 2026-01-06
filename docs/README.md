@@ -136,11 +136,14 @@ $$\text{VIP}_{\text{aggregate}}(j) = \sqrt{\text{VIP}_T^2(j) + \text{VIP}_I^2(j)
 If you use these mathematical foundations in academic work, please cite:
 
 ```bibtex
-@software{neutrosophic_pls,
-  title = {Neutrosophic PLS: Uncertainty-Aware Partial Least Squares},
-  author = {N-PLS Development Team},
-  year = {2024},
-  url = {https://github.com/your-repo/neutrosophic-pls}
+@software{asare_npls_2026,
+  author = {Asare, Ebenezer Aquisman and Abdul-Wahab, Dickson},
+  title = {Neutrosophic Partial Least Squares (N-PLS)},
+  year = {2026},
+  version = {1.0.2},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.18131413},
+  url = {https://doi.org/10.5281/zenodo.18131413}
 }
 ```
 

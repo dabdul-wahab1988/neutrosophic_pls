@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neutrosophic-pls"
-version = "1.0.3"
+version = "1.0.2"
 description = "Neutrosophic Partial Least Squares (N-PLS): Uncertainty-aware PLS with Truth/Indeterminacy/Falsity encoding for chemometrics and spectroscopy"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,8 +22,8 @@ keywords = [
     "variable-importance",
 ]
 authors = [
-    {name = "Dickson Abdul-Wahab", email = "dabdul-wahab@live.com"},
     {name = "Ebenezer Aquisman Asare", email = "aquisman1989@gmail.com"},
+    {name = "Dickson Abdul-Wahab", email = "dabdul-wahab@live.com"},
 ]
 maintainers = [
     {name = "Dickson Abdul-Wahab", email = "dabdul-wahab@live.com"},
@@ -81,7 +81,7 @@ Repository = "https://github.com/dabdul-wahab1988/neutrosophic_pls.git"
 Issues = "https://github.com/dabdul-wahab1988/neutrosophic_pls/issues"
 
 [tool.setuptools]
-packages = ["neutrosophic_pls"]
+packages = { find = { include = ["neutrosophic_pls*"] } }
 
 [tool.setuptools.package-data]
 neutrosophic_pls = ["fixtures/*.arff"]
